@@ -1,6 +1,8 @@
-FROM nvidia/cuda:11.2.0-devel-ubuntu18.04
+FROM nvidia/cuda:11.0-devel
 
-# FROM nvidia/cuda:10.1-devel If using TF>=2.1
+# FROM nvidia/cuda:10.1-devel
+# FROM 11.2.1-cudnn8-devel-ubuntu18.04
+# FROM nvidia/cuda:11.2.0-devel-ubuntu18.04
 
 RUN  apt-get update && apt-get install -y less nano byobu vim bsdmainutils wget git unzip
 
@@ -20,6 +22,8 @@ RUN git clone https://github.com/smousavi05/EQTransformer /eqt &&\
 
 # Create env PHASENET
 COPY eqt_tf2_env.yml eqt_tf2_env.yml
+COPY setup.py /eqt/setup.py
+COPY requirements.txt /eqt/requirements.txt
 RUN /root/miniconda3/bin/conda-env create -f eqt_tf2_env.yml
 RUN echo "conda activate eqt" >> /root/.bashrc
 

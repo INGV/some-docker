@@ -4,7 +4,7 @@ FROM nvidia/cuda:10.0-devel
 
 RUN  apt-get update && apt-get install -y less nano byobu vim bsdmainutils wget git unzip
 
-# ---------- Install miniconda3 + PHASENET environment
+# ---------- Install miniconda3 + GPD environment
 RUN mkdir -p /root/miniconda3
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
             -O /root/miniconda3/miniconda.sh

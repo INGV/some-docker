@@ -1,21 +1,44 @@
 name: eqt
 dependencies:
   - python=3.7.11
-  - cudatoolkit=11.3.1
-  - cudnn=8.2.1
+  - cudatoolkit
+  - cudnn=8.2
   - pip=21.2.2
   - pip:
     - pytest
-    - numpy~=1.19.2
-    - keyring>=15.1
-    - pkginfo>=1.4.2
-    - scipy>=1.4.1
-    - tensorflow~=2.5.0
-    - keras~=2.3.1
+    - numpy
+    - keyring
+    - pkginfo
+    - scipy
+    - tensorflow==2.4.0
+    - keras
     - matplotlib
     - pandas
-    - tqdm>=4.48.0
-    - h5py~=3.1.0
+    - tqdm
+    - h5py
     - obspy==1.2.2
     - jupyterlab==3.2.9
     - -e /eqt
+
+# ==== Official from Repo
+# name: eqt
+# dependencies:
+#   - python=3.7.11
+#   - cudatoolkit=11.3.1
+#   - cudnn=8.2
+#   - pip=21.2.2
+#   - pip:
+#     - pytest
+#     - numpy~=1.19.2
+#     - keyring>=15.1
+#     - pkginfo>=1.4.2
+#     - scipy>=1.4.1
+#     - tensorflow~=2.5.0
+#     - keras~=2.3.1
+#     - matplotlib
+#     - pandas
+#     - tqdm>=4.48.0
+#     - h5py~=3.1.0
+#     - obspy==1.2.2
+#     - jupyterlab==3.2.9
+#     - -e /eqt

@@ -27,3 +27,7 @@ RUN cd /phasenet &&\
 # Final adjustments ...
 RUN echo "alias runpn='python /phasenet/phasenet/predict.py --model=/phasenet/model/190703-214543 '" >> /root/.bashrc
 RUN echo "alias runpn_test='python /phasenet/phasenet/predict.py --model=/phasenet/model/190703-214543 --data_list=/phasenet/test_data/npz.csv --data_dir=/phasenet/test_data/npz --format=numpy --plot_figure'" >> /root/.bashrc
+
+
+
+### https://github.com/wayneweiqiang/PhaseNet/pull/21 --> implement this!
