@@ -1,0 +1,13 @@
+name: eqt
+dependencies:
+  - python=3.7.11
+  - cudatoolkit
+  - cudnn=8.2.1
+  - pip=20.3.3
+  - pip:
+    - -e /eqt
+
+# FROM nvidia/cuda:10.1-devel
+
+# To change package requirements version:
+#   refer to `requirements.CONDA.txt

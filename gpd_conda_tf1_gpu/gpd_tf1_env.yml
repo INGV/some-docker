@@ -1,4 +1,4 @@
-name: gpd
+name: gpd_conda_tf1
 dependencies:
   - python=3.6.8
   - cudatoolkit=10.2.89

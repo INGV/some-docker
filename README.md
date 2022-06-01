@@ -40,16 +40,39 @@ that a simple `$ docker pull mbagagli/IMAGENAME` call will set you up.
 - [use devel CUDA](https://github.com/NVIDIA/nvidia-docker/wiki/CUDA)
 - [tf+cuda compatible](https://stackoverflow.com/questions/50622525/which-tensorflow-and-cuda-version-combinations-are-compatible)
 - [tf official pairs](https://www.tensorflow.org/install/source#tested_build_configurations)
-- [to solve cudann - ( Nicholas-Mitchell commented on Jun 22, 2020 )]https://github.com/tensorflow/tensorflow/issues/20271
+- [to solve cudann - ( Nicholas-Mitchell commented on Jun 22, 2020 )](https://github.com/tensorflow/tensorflow/issues/20271)
 
-### Possible Matches
+### APPS
 
-- **PHASENET**: TensorFlow=2.3  and  CUDA=10.1
-- **GPD**: Tensorfow=2.0  CUDA=10.0   //  Tensorflow=2.3  CUDA=10.1
-- **GPD**: Tensorfow_gpu=1.15  CUDA=10.0
+Currently there are 2 apps that can be used as simple IN-OUT scripts.
+They represent the original images as presented in their GitHub pages.
+Please use the 2 wrappers stored in the `bin/` subfolder
+
+- `run_gpd_app.sh`
+- `run_phasenet_app.sh`
+
+Both wrappers comes with an on-screen helper (`-h`). Check it out!
 
 
 ###  Installation
 In order to run the IMGAES with GPUs support, you must have the [nvidia-docker](https://github.com/NVIDIA/nvidia-docker)
 support on your host system. Easyest (and recommended way) is machine-dependent and is listed [here](
 https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker)
+
+--------------------------------------------------------------------
+
+# Useful infos
+
+RUN and ENTRYPOINT are two different ways to execute a script.
+
+RUN means it creates an intermediate container, runs the script and
+freeze the new state of that container in a new intermediate image.
+The script won't be run after that: your final image is supposed to
+reflect the result of that script.
+
+ENTRYPOINT means your image (which has not executed the script yet) will create a container, and runs that script.
+
+In both cases, the script needs to be added, and a RUN chmod +x /bootstrap.sh is a good idea.
+It should also start with a shebang (like `#!/bin/sh`)
+
+https://stackoverflow.com/questions/32727594/how-to-pass-arguments-to-shell-script-through-docker-run

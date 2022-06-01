@@ -28,7 +28,7 @@ preprocessor(preproc_dir="preproc", mseed_dir='downloads_mseeds',
 
 from EQTransformer.core.predictor import predictor
 predictor(input_dir='downloads_mseeds_processed_hdfs',
-          input_model='/eqt/ModelsAndSampleData/EqT_model.h5',
+          input_model='ModelsAndSampleData/EqT_model.h5',
           output_dir='detections',
           detection_threshold=0.3, P_threshold=0.1, S_threshold=0.1,
           number_of_plots=100, plot_mode='time')

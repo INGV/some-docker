@@ -1,0 +1,109 @@
+FROM nvidia/cuda:10.0-devel
+
+#SHELL [ "/bin/bash", "--login", "-c" ]
+RUN rm /etc/apt/sources.list.d/cuda.list
+RUN rm /etc/apt/sources.list.d/nvidia-ml.list
+RUN  apt-get update && apt-get install -y wget git
+
+# ---> install the app with CONDA <--- #
+# info extracted from https://towardsdatascience.com/conda-pip-and-docker-ftw-d64fe638dc45
+
+# =====================  Create a non-root user
+ARG username=picker
+ARG uid=1000
+ARG gid=100
+ENV USER $username
+ENV UID $uid
+ENV GID $gid
+ENV HOME /home/$USER
+RUN adduser --disabled-password \
+    --gecos "Non-root user" \
+    --uid $UID \
+    --gid $GID \
+    --home $HOME \
+    $USER
+
+# =====================  Install MINICONDA
+USER $USER
+
+# MINICONDA_VERSION = py39_4.11.0    # the same as per other ML picker
+ENV CONDA_DIR $HOME/miniconda3
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-py39_4.11.0-Linux-x86_64.sh \
+        -O ~/miniconda.sh && \
+        chmod +x ~/miniconda.sh && \
+        ~/miniconda.sh -b -p $CONDA_DIR
+RUN rm  ~/miniconda.sh
+
+
+# make non-activate conda commands available
+ENV PATH=$CONDA_DIR/bin:$PATH
+# make conda activate command available from /bin/bash --login shells
+RUN echo ". $CONDA_DIR/etc/profile.d/conda.sh" >> ~/.profile
+
+# ... init conda
+COPY BASHRC.conf ~/.bashrc
+RUN conda init bash
+
+
+# ===================== Install GPD (conda env+pip)
+RUN git clone https://github.com/interseismic/generalized-phase-detection $HOME/gpd &&\
+    cd $HOME/gpd && git checkout ea81ef17d204797de6a99d277fd2b9407fc77df7 -b working_branch &&\
+    rm -rf $HOME/gpd/.git*
+
+# copy env
+COPY --chown=$USER:users gpd_tf1_env.yml $HOME/gpd_tf1_env.yml
+
+#ENV ENV_PREFIX $PWD/env
+RUN conda update --channel defaults conda && \
+    conda env create --file $HOME/gpd_tf1_env.yml --force && \
+    conda clean --all --yes
+
+
+# ===================== Set-up GPD
+USER $USER
+
+COPY --chown=$USER:users  gpd_predict.py $HOME/gpd_predict.py
+COPY --chown=$USER:users  new_anza2016.in $HOME/new_anza2016.in
+
+RUN echo "export GPD=${HOME}" >> $HOME/.bashrc
+RUN echo "export PATH=${PATH}:${HOME}" >> $HOME/.bashrc
+RUN echo "conda activate gpd_conda_tf1" >> $HOME/.bashrc
+
+COPY --chown=$USER:users entrypoint.sh $HOME/entrypoint.sh
+#ENTRYPOINT [ "/home/picker/entrypoint.sh" ]
+#ENTRYPOINT [ "/home/picker/gpd_predict.py" ]
+
+#-V -I new_anza2016.in -O dedede -g 2 -p 0.8
+
+## default command will launch JupyterLab server for development
+#CMD [ "jupyter", "lab", "--no-browser", "--ip", "0.0.0.0" ]
+
+
+## ---------- Install miniconda3 + GPD environment (OLD)
+#RUN mkdir -p /root/miniconda3
+#RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+#            -O /root/miniconda3/miniconda.sh
+#RUN bash /root/miniconda3/miniconda.sh -b -u -p /root/miniconda3
+#RUN rm -rf /root/miniconda3/miniconda.sh
+#COPY BASHRC.conf /root/.bashrc
+#RUN /root/miniconda3/bin/conda init bash
+#
+## ----------  Install GPD (conda env+pip)
+#RUN git clone https://github.com/interseismic/generalized-phase-detection /gpd &&\
+#    cd /gpd && git checkout ea81ef17d204797de6a99d277fd2b9407fc77df7 -b working_branch &&\
+#    rm -rf /gpd/.git*
+#
+## Create env PHASENET
+#COPY gpd_tf1_env.yml gpd_tf1_env.yml
+#RUN /root/miniconda3/bin/conda-env create -f gpd_tf1_env.yml
+#RUN echo "conda activate gpd" >> /root/.bashrc
+#
+## Copy modified script
+#COPY gpd_predict.py /gpd/gpd_predict.py
+#RUN chmod 766 /gpd/gpd_predict.py
+#
+
+
+
+
+

@@ -1,0 +1,33 @@
+name: gpd_conda_tf1
+dependencies:
+  - python=3.6.8
+  - cudatoolkit=10.2.89
+  - cudnn=7.6.5
+  - pip=20.3.3
+  - pip:
+    - tensorflow_gpu==1.15.0
+    - Keras==2.3.0
+    - Keras-Applications==1.0.8
+    - Keras-Preprocessing==1.1.2
+    - h5py==2.10.0
+    - obspy==1.2.2
+    - jupyterlab==3.2.9
+
+    # # Cuda 10.0
+    # - Keras==2.3.0
+    # - Keras-Applications==1.0.8
+    # - Keras-Preprocessing==1.1.2
+    # - tensorflow==2.0.0
+    # - h5py==2.10.0
+    # - obspy==1.2.2
+    # - jupyterlab==3.2.9
+
+
+    # # CUDA 10.1
+    # - Keras==2.3.1
+    # - tensorflow==2.1.0
+    # - obspy==1.2.2
+    # - jupyterlab==3.2.9
+
+  # - cudatoolkit=10.2.89
+  # - cudnn=7.6.5

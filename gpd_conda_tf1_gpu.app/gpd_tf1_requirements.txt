@@ -1,0 +1,9 @@
+# Extracted from https://github.com/wayneweiqiang/PhaseNet/blob/master/requirements.txt
+# Python must be 3.6.8  CUDA 10.1
+Python==3.6.8
+obspy==1.2.2
+Keras==2.3.1
+tensorflow==2.1.0
+
+
+# Here only for REFERENCE! install the app with CONDA

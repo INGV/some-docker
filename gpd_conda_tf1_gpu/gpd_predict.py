@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-# Automatic picking of seismic waves using Generalized Phase Detection 
+# Automatic picking of seismic waves using Generalized Phase Detection
 # See http://scedc.caltech.edu/research-tools/deeplearning.html for more info
 #
 # Ross et al. (2018), Generalized Seismic Phase Detection with Deep Learning,
 #                     Bull. Seismol. Soc. Am., doi:10.1785/0120180080
-#                                              
-# Author: Zachary E. Ross (2018)                
-# Contact: zross@gps.caltech.edu                        
-# Website: http://www.seismolab.caltech.edu/ross_z.html         
+#
+# Author: Zachary E. Ross (2018)
+# Contact: zross@gps.caltech.edu
+# Website: http://www.seismolab.caltech.edu/ross_z.html
 
 import string
 import time
@@ -28,15 +28,17 @@ import matplotlib as mpl
 import pylab as plt
 mpl.rcParams['pdf.fonttype'] = 42
 
+
+PROJ_DIR = "/root/gpd/"
 #####################
-# Hyperparameters
-min_proba = 0.95 # Minimum softmax probability for phase detection
-freq_min = 3.0
-freq_max = 20.0
-filter_data = True
-decimate_data = False # If false, assumes data is already 100 Hz samprate
-n_shift = 10 # Number of samples to shift the sliding window at a time
-n_gpu = 3 # Number of GPUs to use (if any)
+# # Hyperparameters
+# min_proba = 0.95 # Minimum softmax probability for phase detection
+# freq_min = 3.0
+# freq_max = 20.0
+# filter_data = True
+# decimate_data = False # If false, assumes data is already 100 Hz samprate
+# n_shift = 10 # Number of samples to shift the sliding window at a time
+# n_gpu = 3 # Number of GPUs to use (if any)
 #####################
 batch_size = 1000*3
 
@@ -45,7 +47,8 @@ only_dt = 0.01
 n_win = int(half_dur/only_dt)
 n_feat = 2*n_win
 
-#-------------------------------------------------------------
+# -------------------------------------------------------------
+
 
 def sliding_window(data, size, stepsize=1, padded=False, axis=-1, copy=True):
     """
@@ -118,6 +121,7 @@ def sliding_window(data, size, stepsize=1, padded=False, axis=-1, copy=True):
     else:
         return strided
 
+
 if __name__ == "__main__":
     parser = ap.ArgumentParser(
         prog='gpd_predict.py',
@@ -143,7 +147,52 @@ if __name__ == "__main__":
         default=False,
         action='store_true',
         help='verbose')
+    #
+    parser.add_argument(
+        '-g',
+        type=int,
+        default=1,
+        help='number of gpus')
+    parser.add_argument(
+        '-a',
+        type=float,
+        default=0.95,
+        help='Minimum softmax probability for phase detection')
+    parser.add_argument(
+        '-b',
+        type=float,
+        default=3.0,
+        help='Lower frequency for bandpass filtering')
+    parser.add_argument(
+        '-c',
+        type=float,
+        default=20.0,
+        help='Upper frequency for bandpass filtering')
+    parser.add_argument(
+        '-d',
+        default=True,
+        action='store_false',
+        help='Switch to filter the input waveforms')
+    parser.add_argument(
+        '-e',
+        default=False,
+        action='store_true',
+        help='Switch to decimate the data. To be used if inputs are'
+             'not sampled @ 100 Hz')
+    parser.add_argument(
+        '-f',
+        type=int,
+        default=10,
+        help='Number of samples to shift the sliding window at a time')
+
     args = parser.parse_args()
+    n_gpu = args.g
+    min_proba = args.a
+    freq_min = args.b
+    freq_max = args.c
+    filter_data = args.d
+    decimate_data = args.e
+    n_shift = args.f
 
     plot = args.P
 
@@ -158,13 +207,13 @@ if __name__ == "__main__":
     nsta = len(fdir)
 
     # load json and create model
-    json_file = open('model_pol.json', 'r')
+    json_file = open(PROJ_DIR+"model_pol.json", 'r')
     loaded_model_json = json_file.read()
     json_file.close()
     model = model_from_json(loaded_model_json, custom_objects={'tf':tf})
 
     # load weights into new model
-    model.load_weights("model_pol_best.hdf5")
+    model.load_weights(PROJ_DIR+"model_pol_best.hdf5")
     print("Loaded model from disk")
 
     if n_gpu > 1:
