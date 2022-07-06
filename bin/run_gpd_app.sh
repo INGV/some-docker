@@ -64,6 +64,8 @@ do
     esac
 done
 
+STOREDATE=$(date +'%Y%m%d_%H%M%S')
+
 # --- Set MANDATORY
 if [ -z "${filename}" ]; then
     echo "USAGE:  $(basename $0) -i FILENAME  (type -h for help)"
@@ -84,7 +86,7 @@ if [ -z "${ngpu}" ]; then
 fi
 
 if [ -z "${outfilename}" ]; then
-    outfilename="gpd_results_$(date +'%Y%m%d_%H%M%S').txt"
+    outfilename="gpd_results_${STOREDATE}.txt"
 fi
 
 if [ -z "${dockerimage}" ]; then

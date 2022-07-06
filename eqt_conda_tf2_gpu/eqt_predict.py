@@ -1,4 +1,8 @@
-#!/root/miniconda3/envs/eqt/bin/python
+#!/usr/bin/env python
+
+"""
+/root/miniconda3/envs/eqt/bin/python
+"""
 
 import os
 json_basepath = os.path.join(os.getcwd(), "json/station_list.json")
@@ -34,18 +38,42 @@ preprocessor(preproc_dir="preproc", mseed_dir='downloads_mseeds',
 
 # --- New
 from EQTransformer.core.mseed_predictor import mseed_predictor
-mseed_predictor(input_dir='downloads_mseeds',
-         input_model='ModelsAndSampleData/EqT_model.h5',
+mseed_predictor(
+         input_dir='downloads_mseeds',
+         input_model='ModelsAndSampleData/EqT_original_model.h5',   # EqT_model_conservative.h5
          stations_json=json_basepath,
          output_dir='detections2',
          loss_weights=[0.02, 0.40, 0.58],
-         detection_threshold=0.3,
-         P_threshold=0.1,
-         S_threshold=0.1,
+         detection_threshold=0.7,
+         P_threshold=0.3,
+         S_threshold=0.3,
          number_of_plots=0,  # here's the change in frequency
          plot_mode='time_frequency',
          normalization_mode='std',
          batch_size=500,
-         overlap=0.3,
+         overlap=0.9,
          gpuid=None,
          gpu_limit=None)
+
+
+# ======== Example of station-json
+"""
+{
+ 'CA06': {'channels': ['HHZ', 'HH1', 'HH2'],
+          'coords': [35.59962, -117.49268, 796.4],
+          'network': 'GS'},
+ 'CA10': {'channels': ['HN1', 'HN2', 'HNZ'],
+          'coords': [35.56736, -117.66743, 835.9],
+          'network': 'GS'},
+ 'SV08': {'channels': ['HHN', 'HHZ', 'HHE'],
+          'coords': [35.5761, -117.4187, 604.0],
+          'network': 'ZY'}
+}
+"""
+
+#MSEED
+#/downloads_mseeds/CA06/GS.CA06.00.HHZ__20190901T000000Z__20190902T000000Z.mseed  # 1day long mseed
+#/downloads_mseeds/CA06/GS.CA06.00.HHZ__20190902T000000Z__20190903T000000Z.mseed
+
+#XML
+#/downloads_mseedsxml/CA06/GS.CA06.xml

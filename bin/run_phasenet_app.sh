@@ -3,7 +3,7 @@
 Help()
 {
 cat<<EOF
- --->  PHASENET  DockerApp  //  TensorFlow: 2.3 <---
+ --->  PHASENET  DockerApp  //  TensorFlow: 2.0 <---
 This wrapper will lunch the PhaseNet docker image, implementing the very
 one original model (from GitHub page - last accessed 31.05.2022).
 
@@ -77,6 +77,7 @@ do
     esac
 done
 
+STOREDATE=$(date +'%Y%m%d_%H%M%S')
 
 # --- Set MANDATORY
 if [ -z "${csvfile}" ] || [ -z "${datadir}" ] || [ -z "${dataformat}" ]; then
@@ -90,7 +91,7 @@ if [ -z "${mountdisk}" ]; then
 fi
 
 if [ -z "${outfilename}" ]; then
-    outfilename="phasenet_results_$(date +'%Y%m%d_%H%M').txt"
+    outfilename="phasenet_results_${STOREDATE}.txt"
 fi
 
 if [ -z "${dockerimage}" ]; then

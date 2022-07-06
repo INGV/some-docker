@@ -46,12 +46,31 @@ RUN git clone https://github.com/smousavi05/EQTransformer $HOME/eqt &&\
 RUN mv $HOME/eqt/ModelsAndSampleData $HOME/
 RUN rm -rf $HOME/eqt
 
-# Copy modified script
-COPY eqt_predict.py $HOME/eqt_predict.py
-RUN chmod 766 $HOME/eqt_predict.py
 
-# Copy modified script APP
+# ===================== FINAL ADJUSTMENT
+# Copy modified script
 COPY eqt_predict_app.py $HOME/eqt_predict_app.py
 RUN chmod 766 $HOME/eqt_predict_app.py
-
 RUN echo "conda activate eqt_conda_tf2" >> $HOME/.bashrc
+
+# Copy TF1 Session mod in predictor.py already installed by PIP
+COPY predictor_tf2_tf1_session.py $HOME/miniconda3/envs/eqt_conda_tf2/lib/python3.7/site-packages/EQTransformer/core/predictor.py
+
+COPY entrypoint.sh $HOME/entrypoint.sh
+RUN chmod 766 $HOME/entrypoint.sh
+ENTRYPOINT ["/root/entrypoint.sh"]
+
+
+# /root/miniconda3/envs/eqt_conda_tf2/lib/python3.7/site-packages/EQTransformer/core/predictor.py
+
+
+#     --gpuid  0,1  --gpu_limit 0.75
+#     --number_of_plots  10  --plot_mode  'time'
+#
+#Traceback (most recent call last):
+#  File "./eqt_predict_app.py", line 168, in <module>
+#    plot_mode=myargs.plot_mode                              # default: 'time' ["time_frequency"]
+#  File "/root/miniconda3/envs/eqt_conda_tf2/lib/python3.7/site-packages/EQTransformer/core/predictor.py", line 201, in predictor
+#    tf.Session(config=tf.ConfigProto(log_device_placement=True))
+#AttributeError: module 'tensorflow' has no attribute 'Session'
+
