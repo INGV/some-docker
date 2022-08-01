@@ -17,12 +17,17 @@ Parameters:
         a) minprob_p      Minimum softmax probability for P phase detection [0.3]
         b) minprob_s      Minimum softmax probability for S phase detection [0.3]
         c) highpass       Lower frequency for highpass filtering if filter active [0.0]
+        u) force_cpu      Force the usage of Tensorflow-CPU
+        g) gpu_device     Specify 1 or more GPU-index (i.e.  0  or 0,1 ). Make
+                          sure no spaces are in between indexes if multi-index.
         p) minpeakdist    Minimum peak distance [50.0]
-        z) debug          If specifyed, amplitude and probability will be stored.
-                          Type True
+        z) debug          If specified, amplitude and probability will be stored.
+                          !!! WARNING !!! If specified, a lot of space will be
+                          used. Make sure to have enough space on disk
 
 If GPU not present in the host machine, it will automatically
-switch to the CPU-based of TensorFlow.
+switch to the CPU-based of TensorFlow. If you want to force
+CPU instead, use the -u flag
 
 NB: Please bare in mind that the mountdisk point must be a parent
 directory of your input file!
@@ -56,7 +61,7 @@ exit
 # parser.add_argument("--save_prob", action="store_true", help="If save result for test")
 
 # debug=false
-while getopts "hzi:d:f:m:x:a:b:c:p:" flagg
+while getopts "hzui:d:f:m:x:a:b:c:p:g:" flagg
 do
     case "${flagg}" in
         #
@@ -69,6 +74,8 @@ do
         a) minprob_p=${OPTARG};;
         b) minprob_s=${OPTARG};;
         c) highpass=${OPTARG};;
+        u) force_cpu=true;;
+        g) gpu_device=${OPTARG};;
         p) minpeakdist=${OPTARG};;
         z) debug=true;;
         #
@@ -123,6 +130,32 @@ else
     filterdataHelp="False"
 fi
 
+# ======================================================================
+# ==========================================================  START GPU
+
+if [ -z "${gpu_device}" ]; then
+    usegpulog="ALL"
+else
+    usegpulog="${gpu_device}"
+fi
+
+# # --- Goes for last and override the device selection or the
+# #     usage of GPU in general
+
+if [ "${force_cpu}" = true ]; then
+    forcecpulog="True"
+    forcecpuswitch=true
+    usegpulog="NONE"
+    usegpuswitch=false
+else
+    forcecpulog="False"
+    forcecpuswitch=false
+    usegpuswitch=true
+fi
+
+# ==========================================================  END GPU
+# ======================================================================
+
 if [ "${debug}" = true ]; then
     debuglog="--amplitude --save_prob"
     debuglogHelp="True"
@@ -130,7 +163,6 @@ else
     debuglog=""
     debuglogHelp="False"
 fi
-
 
 # ==============================================  Expand and Run
 echo "-----------------------"
@@ -153,6 +185,8 @@ echo " - Min Prob-S:      ${minprob_s}"
 echo " - Highpass:        ${highpass}"
 echo " - Min Peak Dist.:  ${minpeakdist}"
 echo " - Debug Log:       ${debuglogHelp}"
+echo " - Force CPU:       ${forcecpulog}"
+echo " - GPU device:      ${usegpulog}"
 echo ""
 echo "Activating DOCKER:  ${dockerimage}"
 
@@ -170,13 +204,47 @@ echo "Activating DOCKER:  ${dockerimage}"
 #--user $(id -u):$(id -u) MUST BE THE INITIAL PAR
 DOCKERMOUNTPATH="/mymount"  # <---------- NEVER CHANGE THIS !!!
 
-docker run --rm --gpus all -v ${mountdisk}:${DOCKERMOUNTPATH}  ${dockerimage}\
-  $(id -u) $(id -u) --model=model/190703-214543\
-  --data_list=${DOCKERMOUNTPATH}/${csvfile}\
-  --data_dir=${DOCKERMOUNTPATH}/${datadir}\
-  --format=${dataformat}\
-  --min_p_prob=${minprob_p}\
-  --min_s_prob=${minprob_s}\
-  --highpass_filter=${highpass} ${debuglog}
+if [ "${forcecpuswitch}" = true ]; then
+    # Use CPUs
+    echo "... Using only CPU"
+    docker run --rm -v ${mountdisk}:${DOCKERMOUNTPATH}  ${dockerimage}\
+      $(id -u) $(id -u) --model=model/190703-214543\
+      --data_list=${DOCKERMOUNTPATH}/${csvfile}\
+      --data_dir=${DOCKERMOUNTPATH}/${datadir}\
+      --format=${dataformat}\
+      --min_p_prob=${minprob_p}\
+      --min_s_prob=${minprob_s}\
+      --highpass_filter=${highpass} ${debuglog}
+
+elif [ "${usegpuswitch}" = true ]; then
+    # Use GPUs
+    echo -n "... Using GPU"
+    if [ ! -z "${gpu_device}" ]; then
+        # Use specific GPUs
+        echo " ... ${gpu_device}"
+        docker run --rm --gpus '"'device=${gpu_device}'"' -v ${mountdisk}:${DOCKERMOUNTPATH}  ${dockerimage}\
+          $(id -u) $(id -u) --model=model/190703-214543\
+          --data_list=${DOCKERMOUNTPATH}/${csvfile}\
+          --data_dir=${DOCKERMOUNTPATH}/${datadir}\
+          --format=${dataformat}\
+          --min_p_prob=${minprob_p}\
+          --min_s_prob=${minprob_s}\
+          --highpass_filter=${highpass} ${debuglog}
+    else
+        # Use all GPUs
+        echo " ... ALL"
+        docker run --rm --gpus all -v ${mountdisk}:${DOCKERMOUNTPATH}  ${dockerimage}\
+          $(id -u) $(id -u) --model=model/190703-214543\
+          --data_list=${DOCKERMOUNTPATH}/${csvfile}\
+          --data_dir=${DOCKERMOUNTPATH}/${datadir}\
+          --format=${dataformat}\
+          --min_p_prob=${minprob_p}\
+          --min_s_prob=${minprob_s}\
+          --highpass_filter=${highpass} ${debuglog}
+    fi
+
+else
+    echo "Something went wrong! I'll do nothing ..."
+fi
 
 echo "Finished!"
